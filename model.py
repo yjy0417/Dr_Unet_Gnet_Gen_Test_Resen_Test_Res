@@ -1,5 +1,5 @@
-from tensorflow import keras
 import tensorflow as tf
+import keras
 
 
 def dice_loss(y_true, y_pred, smooth=1e-6):
@@ -155,7 +155,6 @@ def dr_unet(pretrained_weights=None, input_size=(128, 128, 1), dims=32):
 if __name__ == '__main__':
     import numpy as np
 
-
     def generate_fake_data(num_samples, input_size):
         # 生成随机数据作为样本
         x = np.random.random((num_samples,) + input_size)
@@ -164,10 +163,13 @@ if __name__ == '__main__':
         return x, y
 
 
-    num_samples = 10
+    num_samples = 100000
     input_size = (128, 128, 1)
     x_train, y_train = generate_fake_data(num_samples, input_size)
 
-    model = dr_unet(pretrained_weights=r"D:\WeChat Files\wxid_s1m1kt6lt2eo22\FileStorage\File\2024-04\DR_UNet_CV0.keras",
+    model = dr_unet(pretrained_weights=None,
                     input_size=input_size)
-    model.fit(x_train, y_train, epochs=5, batch_size=1)
+    # model.fit(x_train, y_train, epochs=5, batch_size=1)
+    batch_size = 16
+    testPredictions = model.predict(x_train, verbose=1,
+                                    batch_size=batch_size)

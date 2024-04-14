@@ -90,8 +90,8 @@ def testModel(model_path, test_path, save_path):
     batch_size = 16
     modelUnet = dr_unet(pretrained_weights=model_path, input_size=(windowLen, windowLen, 1))
     testGener = testGenerator(test_path, target_size=(windowLen, windowLen, 1))
-    testPredictions = modelUnet.predict(testGener, n_imagesTest, verbose=1,
-                                        steps=n_imagesTest // batch_size, batch_size=batch_size)
+    testPredictions = modelUnet.predict(x=testGener, verbose=1,
+                                        batch_size=batch_size)
     saveResult(test_path, save_path,
                testPredictions)  # sending the test image path so same name will be used for saving masks
 
