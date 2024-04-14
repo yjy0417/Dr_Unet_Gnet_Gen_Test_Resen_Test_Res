@@ -173,3 +173,5 @@ if __name__ == '__main__':
     batch_size = 16
     testPredictions = model.predict(x_train, verbose=1,
                                     batch_size=batch_size)
+
+
