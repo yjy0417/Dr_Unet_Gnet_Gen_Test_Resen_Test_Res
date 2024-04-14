@@ -102,6 +102,7 @@ def validateGenerator(batch_size,train_path,image_folder,mask_folder,image_color
 
 def testGenerator(test_path, target_size = (128,128),flag_multi_class = False,as_gray = True):
     image_name_arr = glob.glob(os.path.join(test_path, "*.png"))
+    cnt = 0
     for index, item in enumerate(image_name_arr):
         img = imread(item)
         img = img / 255
@@ -110,6 +111,9 @@ def testGenerator(test_path, target_size = (128,128),flag_multi_class = False,as
         img = np.reshape(img, img.shape + (1,)) if (not flag_multi_class) else img
         img = np.reshape(img, (1,) + img.shape)
         yield (img,)
+        cnt += 1
+        if cnt > 1000:
+            break
 
 
 def geneTrainNpy(image_path,mask_path,flag_multi_class = False,num_class = 2,image_prefix = "image",mask_prefix = "mask",image_as_gray = True,mask_as_gray = True):
