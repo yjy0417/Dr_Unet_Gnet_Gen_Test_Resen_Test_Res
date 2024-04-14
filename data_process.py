@@ -133,13 +133,22 @@ def geneTrainNpy(image_path,mask_path,flag_multi_class = False,num_class = 2,ima
     return image_arr,mask_arr
 
 
-def saveResult(test_path,save_path,npyfile,flag_multi_class = False,num_class = 2):
-    image_name_arr = glob.glob(os.path.join(test_path, "*.png"))
-    string = image_name_arr[0];word = 'image'
-    index = string.find(word)+6
-    for i,item in enumerate(image_name_arr):
-        img = npyfile[i,:,:,0]
-        imsave(Path(save_path, item[index:]), np.uint8(img*255)) #index: to take only the image name that was read before
+def saveResult(test_path, save_path, prediction, file_name, flag_multi_class=False, num_class=2):
+    if flag_multi_class:
+        img = np.argmax(prediction, axis=3)
+    else:
+        img = prediction[:, :, 0]
+
+    save_file = Path(save_path, file_name)
+    imsave(save_file, np.uint8(img * 255))
+
+# def saveResult(test_path,save_path,npyfile,flag_multi_class = False,num_class = 2):
+#     image_name_arr = glob.glob(os.path.join(test_path, "*.png"))
+#     string = image_name_arr[0];word = 'image'
+#     index = string.find(word)+6
+#     for i,item in enumerate(image_name_arr):
+#         img = npyfile[i,:,:,0]
+#         imsave(Path(save_path, item[index:]), np.uint8(img*255)) #index: to take only the image name that was read before
 
 def LoadTestMask(test_path,num_image,target_size = (128,128),flag_multi_class = False,as_gray = True):
     Allsegment = np.zeros([num_image, target_size[0], target_size[1], 1], dtype=np.float32)

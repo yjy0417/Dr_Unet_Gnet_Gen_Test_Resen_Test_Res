@@ -75,25 +75,40 @@ def dice_fun(im1, im2):
 
     return 2. * intersection.sum() / (im1.sum() + im2.sum())
 
+# def testModel(model_path, test_path, save_path):
+#     """
+#     这个函数，用来测试模型在测试集上面的分割效果
+#
+#     模型在测试集上面的分割结果，将会出现在result_trial[次数]的文件夹中
+#     届时，可用“计算HV.py”这个代码文件，读取其中的分割结果，计算出对各个病人预测的血肿体积大小。
+#
+#     :param model_path:
+#     :param test_path:
+#     :param save_path:
+#     :return:
+#     """
+#     batch_size = 16
+#     modelUnet = dr_unet(pretrained_weights=model_path, input_size=(windowLen, windowLen, 1))
+#     testGener = testGenerator(test_path, target_size=(windowLen, windowLen, 1))
+#     testPredictions = modelUnet.predict(x=testGener, verbose=1,
+#                                         steps=1)
+#     saveResult(test_path, save_path,
+#                testPredictions)  # sending the test image path so same name will be used for saving masks
 def testModel(model_path, test_path, save_path):
-    """
-    这个函数，用来测试模型在测试集上面的分割效果
-
-    模型在测试集上面的分割结果，将会出现在result_trial[次数]的文件夹中
-    届时，可用“计算HV.py”这个代码文件，读取其中的分割结果，计算出对各个病人预测的血肿体积大小。
-
-    :param model_path:
-    :param test_path:
-    :param save_path:
-    :return:
-    """
-    batch_size = 16
+    # 加载预训练的模型
     modelUnet = dr_unet(pretrained_weights=model_path, input_size=(windowLen, windowLen, 1))
+
+    # 获取测试数据的文件列表
+    test_files = os.listdir(test_path)
+    n_imagesTest = len(test_files)  # 更新此处以使用正确的测试图像数
     testGener = testGenerator(test_path, target_size=(windowLen, windowLen, 1))
-    testPredictions = modelUnet.predict(x=testGener, verbose=1,
-                                        steps=1)
-    saveResult(test_path, save_path,
-               testPredictions)  # sending the test image path so same name will be used for saving masks
+
+    for i, file in enumerate(test_files):
+        img = next(testGener)  # 从生成器中获取下一张图像
+        prediction = modelUnet.predict(img)  # 预测当前图像
+
+        saveResult(test_path, save_path, prediction, file)
+        print(f"Processed {i + 1}/{n_imagesTest}")  # 打印进度
 
 
 data_gen_args = dict(
