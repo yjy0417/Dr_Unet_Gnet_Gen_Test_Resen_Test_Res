@@ -129,18 +129,15 @@ def geneTrainNpy(image_path,mask_path,flag_multi_class = False,num_class = 2,ima
     return image_arr,mask_arr
 
 
-def saveResult(test_path, save_path, prediction, file_name, flag_multi_class=False, num_class=2):
-    if flag_multi_class:
-        img = np.argmax(prediction, axis=3)
-    else:
-        img = prediction[:, :, 0]
+def saveResult(test_path,save_path,npyfile,flag_multi_class = False,num_class = 2):
+    image_name_arr = glob.glob(os.path.join(test_path, "*.png"))
+    string = image_name_arr[0]
+    word = 'image'
 
-    save_file = Path(save_path, file_name)
-    img = np.uint8(img * 255)
-    if img.ndim == 3 and img.shape[2] == 1:
-        img = np.reshape(img, img.shape[:2])
-
-    imsave(save_file, img)
+    index = string.find(word)+6
+    for i,item in enumerate(image_name_arr):
+        img = npyfile[i,:,:,0]
+        imsave(Path(save_path, item[index:]), np.uint8(img*255)) #index: to take only the image name that was read before
 
 # def saveResult(test_path,save_path,npyfile,flag_multi_class = False,num_class = 2):
 #     image_name_arr = glob.glob(os.path.join(test_path, "*.png"))

@@ -94,21 +94,13 @@ def dice_fun(im1, im2):
 #                                         steps=1)
 #     saveResult(test_path, save_path,
 #                testPredictions)  # sending the test image path so same name will be used for saving masks
+
 def testModel(model_path, test_path, save_path):
-    # 加载预训练的模型
     modelUnet = dr_unet(pretrained_weights=model_path, input_size=(windowLen, windowLen, 1))
-
-    # 获取测试数据的文件列表
-    test_files = os.listdir(test_path)
-    n_imagesTest = len(test_files)  # 更新此处以使用正确的测试图像数
     testGener = testGenerator(test_path, target_size=(windowLen, windowLen, 1))
-
-    for i, file in enumerate(test_files):
-        img = next(testGener)  # 从生成器中获取下一张图像
-        prediction = modelUnet.predict(img)  # 预测当前图像
-
-        saveResult(test_path, save_path, prediction, file)
-        print(f"Processed {i + 1}/{n_imagesTest}")  # 打印进度
+    testPredictions = modelUnet.predict(testGener, 1, verbose=1)
+    saveResult(test_path, save_path,
+               testPredictions)  # sending the test image path so same name will be used for saving masks
 
 
 data_gen_args = dict(
