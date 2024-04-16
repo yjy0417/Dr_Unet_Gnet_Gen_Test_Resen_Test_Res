@@ -115,8 +115,9 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
                         subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV) : cvI*int(numSubj/NumCV)+int(numSubj/NumCV)]
                         subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled,range(cvI * int(numSubj / NumCV),cvI * int(numSubj / NumCV) + int(numSubj / NumCV)))
                     else:
-                        subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV) : int(numSubj * 0.8)]
-                        subjectNums_cvI_trainVal = subject_nums_shaffled[]
+                        subjectNums_cvI_testing = subject_nums_shaffled[cvI * int(numSubj / NumCV):numSubj]
+                        subjectNums_cvI_trainVal = np.array(
+                            [subject_nums_shaffled[i] for i in range(cvI * int(numSubj / NumCV), numSubj)])
                 else:
                     subjectNums_cvI_testing = subject_nums_shaffled[: int(numSubj * 0.2)]
                     subjectNums_cvI_trainVal = subject_nums_shaffled[int(numSubj * 0.2):]
