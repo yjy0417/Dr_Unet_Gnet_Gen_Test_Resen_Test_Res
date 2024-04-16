@@ -100,17 +100,16 @@ def validateGenerator(batch_size,train_path,image_folder,mask_folder,image_color
         yield (img,mask)
 
 
-def testGenerator(test_path, target_size = (128,128),flag_multi_class = False,as_gray = True):
+def testGenerator(test_path, target_size=(128, 128), flag_multi_class=False, as_gray=True):
     image_name_arr = glob.glob(os.path.join(test_path, "*.png"))
     for index, item in enumerate(image_name_arr):
         img = imread(item)
         img = img / 255
-        if img.shape[0]!=target_size[0]|img.shape[1]!=target_size[1]:
+        if img.shape[0] != target_size[0] | img.shape[1] != target_size[1]:
             img = trans.resize(img, target_size)
         img = np.reshape(img, img.shape + (1,)) if (not flag_multi_class) else img
-        img = np.reshape(img, (1,) + img.shape)
-        yield (img,)
-
+        img = np.reshape(img, img.shape)
+        yield img
 
 def geneTrainNpy(image_path,mask_path,flag_multi_class = False,num_class = 2,image_prefix = "image",mask_prefix = "mask",image_as_gray = True,mask_as_gray = True):
     image_name_arr = glob.glob(os.path.join(image_path,"%s*.png"%image_prefix))

@@ -96,12 +96,24 @@ def dice_fun(im1, im2):
 #                testPredictions)  # sending the test image path so same name will be used for saving masks
 
 def testModel(model_path, test_path, save_path):
+    # 构建 U-Net 模型
     modelUnet = dr_unet(pretrained_weights=model_path, input_size=(windowLen, windowLen, 1))
-    testGener = testGenerator(test_path, target_size=(windowLen, windowLen, 1))
-    testPredictions = modelUnet.predict(testGener, 1, verbose=1)
-    saveResult(test_path, save_path,
-               testPredictions)  # sending the test image path so same name will be used for saving masks
 
+    # 使用 testGenerator 获取测试数据
+    testGener = testGenerator(test_path, target_size=(windowLen, windowLen, 1))
+
+    # 将生成的数据保存到列表中
+    test_images = []
+    for i, img in enumerate(testGener):
+        if img is None: break
+        test_images.append(img)
+
+    test_images_np = np.array(test_images)
+
+    testPredictions = modelUnet.predict(test_images_np, batch_size=1, verbose=1)
+
+    # 保存预测结果
+    saveResult(test_path, save_path, testPredictions)
 
 data_gen_args = dict(
     rotation_range=20,
