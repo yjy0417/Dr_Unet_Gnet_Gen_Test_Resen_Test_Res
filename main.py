@@ -147,7 +147,7 @@ if __name__ == '__main__':
 
 
     num_CV = 1        # 这里是交叉验证的折数
-    NumEpochs = 1    # 这里控制训练的epoch数量
+    NumEpochs = 200    # 这里控制训练的epoch数量
     NumEpochEval = 1  # validated the model each NumEpochEval epochs
     batch_size = 32   # batch_size的设置
     learning_rateI = 1e-5
