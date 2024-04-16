@@ -115,8 +115,8 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
                     subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled,range(cvI * int(numSubj / NumCV),cvI * int(numSubj / NumCV) + int(numSubj / NumCV)))
 
                 else:
-                    subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV):numSubj]
-                    subjectNums_cvI_trainVal = np.array([subject_nums_shaffled[i] for i in range(cvI * int(numSubj / NumCV), numSubj)])
+                    subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV) : int(numSubj * 0.2)]
+                subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled, range(int(numSubj * 0.2), numSubj))
 
                 counterI=0
 
@@ -133,7 +133,7 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
                     randomSlice=random.choice(SlicesWithoutHemm[0])
                     for sliceI in range(0,sliceNums.size):
                         if NoHemorrhage[sliceI] == 0 or sliceI==randomSlice: # Saving only the windows that have hemorrhage or
-                                                                             # if the slice is selected randomly then save its crops
+                            # if the slice is selected randomly then save its crops
                             #segmenting the ct scan and the masks
                             x_ct_segmented = segment_ct(ct_scan[:, :, sliceI], imageLen, windowLen, n_moves)
                             x_mask_segment = segment_ct(masks[:, :, sliceI], imageLen, windowLen, n_moves)
@@ -150,7 +150,7 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
                 counterI = 0
                 for subIvalidate in range(0, int(0.2 * total_trainval)):  # take only the first fold for validation
                     sliceNums = hemorrhage_diagnosis_array[hemorrhage_diagnosis_array[:, 0] == subjectNums_cvI_trainVal[subIvalidate], 1]
-                    
+
                     # Loading the CT scans and the masks
                     ct_scan, masks= load_ct_mask(datasetDir, subjectNums_cvI_trainVal[subIvalidate]+49, window_specs)
 
@@ -183,9 +183,9 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
                         x_mask_segment = segment_ct(masks[:, :, sliceI], imageLen, windowLen, n_moves)
 
                         imsave(Path(crossvalid_dir,'CV' + str(cvI),'test','fullCT','image', str(subjectNums_cvI_testing[subItest])
-                                          + '_' + str(counterI) + '.png'),np.uint8(ct_scan[:, :, sliceI]))
+                                    + '_' + str(counterI) + '.png'),np.uint8(ct_scan[:, :, sliceI]))
                         imsave(Path(crossvalid_dir,'CV' + str(cvI),'test','fullCT','label', str(subjectNums_cvI_testing[subItest])
-                                          + '_' + str(counterI) + '.png'),np.uint8(masks[:, :, sliceI]))
+                                    + '_' + str(counterI) + '.png'),np.uint8(masks[:, :, sliceI]))
 
                         counterCrop = 0
                         for i in range(n_moves * n_moves):
