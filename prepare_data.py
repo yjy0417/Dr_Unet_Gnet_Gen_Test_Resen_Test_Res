@@ -110,14 +110,16 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
                     os.mkdir(str(Path(crossvalid_dir, 'CV' + str(cvI), 'validate', 'image')))
                     os.mkdir(str(Path(crossvalid_dir, 'CV' + str(cvI), 'validate','label')))
 
-                if cvI<NumCV-1:
-                    subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV):cvI*int(numSubj/NumCV)+int(numSubj/NumCV)]
-                    subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled,range(cvI * int(numSubj / NumCV),cvI * int(numSubj / NumCV) + int(numSubj / NumCV)))
-
+                if NumCV != 1:
+                    if cvI<NumCV-1:
+                        subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV) : cvI*int(numSubj/NumCV)+int(numSubj/NumCV)]
+                        subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled,range(cvI * int(numSubj / NumCV),cvI * int(numSubj / NumCV) + int(numSubj / NumCV)))
+                    else:
+                        subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV) : int(numSubj * 0.8)]
+                        subjectNums_cvI_trainVal = subject_nums_shaffled[]
                 else:
-                    subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV) : int(numSubj * 0.8)]
-                    subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled, range( int(numSubj * 0.8), numSubj) )
-
+                    subjectNums_cvI_testing = subject_nums_shaffled[: int(numSubj * 0.2)]
+                    subjectNums_cvI_trainVal = subject_nums_shaffled[int(numSubj * 0.2):]
                 counterI=0
 
                 #Training CT scans
