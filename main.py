@@ -215,8 +215,9 @@ if __name__ == '__main__':
         print('n_imagesTrain', n_imagesTrain)
         n_imagesValidate = len(glob.glob(os.path.join(str(Path(dataDir, 'validate', 'image')), "*.png")))
         print('n_imagesValidate', n_imagesValidate)
-        n_imagesTest = len(glob.glob(os.path.join(str(Path(dataDir, 'test', 'crops', 'image')), "*.png")))
+        n_imagesTest = len(glob.glob(os.path.join(str(Path(dataDir, 'test', 'fullCT', 'image')), "*.png")))
         print('n_imagesTest: ', n_imagesTest)
+        n_imagesTest = len(glob.glob(os.path.join(str(Path(dataDir, 'test', 'crops', 'image')), "*.png")))
         trainGener = trainGenerator(batch_size, str(Path(dataDir, 'train')), 'image', 'label', data_gen_args,
                                     save_to_dir=None, target_size=(128, 128))
         valGener = validateGenerator(batch_size, str(Path(dataDir, 'validate')), 'image', 'label', save_to_dir=None,
