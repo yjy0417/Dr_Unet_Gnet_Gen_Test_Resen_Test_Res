@@ -111,6 +111,8 @@ def testModel(model_path, test_path, save_path):
         print('Ready to test in Batch: ', cur_batch_id)
         test_images = []
         for _ in range(batch_size):
+            if flag is False:
+                break
             i, img = next(testGener)
             if img is None:
                 flag = False
