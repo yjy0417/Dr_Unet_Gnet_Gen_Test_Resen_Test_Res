@@ -116,7 +116,7 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
 
                 else:
                     subjectNums_cvI_testing = subject_nums_shaffled[cvI*int(numSubj/NumCV) : int(numSubj * 0.2)]
-                subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled, range(int(numSubj * 0.2), numSubj))
+                    subjectNums_cvI_trainVal = np.delete(subject_nums_shaffled, range(int(numSubj * 0.2), numSubj) )
 
                 counterI=0
 
