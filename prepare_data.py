@@ -151,7 +151,7 @@ def prepare_data(dataset_zip_dir, crossvalid_dir, numSubj, imageLen, windowLen, 
 
                 # Validation CT scans
                 counterI = 0
-                for subIvalidate in range(0, int(0.2 * total_trainval)):  # take only the first fold for validation
+                for subIvalidate in range(0, int(0.1 * total_trainval)):  # take only the first fold for validation
                     sliceNums = hemorrhage_diagnosis_array[hemorrhage_diagnosis_array[:, 0] == subjectNums_cvI_trainVal[subIvalidate], 1]
 
                     # Loading the CT scans and the masks

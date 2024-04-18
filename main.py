@@ -38,8 +38,8 @@ def Jaccard_img(y_true, y_pred):  # https://www.jeremyjordan.me/evaluating-image
     for i in range(y_true.shape[0]):
         if np.sum(y_true[
                       i]) > 0:  # Considering only the slices that have hemorrhage regions, if y_true is all zeros -> iou_score=nan.
-            im1 = np.asarray(y_true[i]).astype(np.bool)
-            im2 = np.asarray(y_pred[i]).astype(np.bool)
+            im1 = np.asarray(y_true[i]).astype(np.bool_)
+            im2 = np.asarray(y_pred[i]).astype(np.bool_)
             intersection = np.logical_and(im1, im2)
             union = np.logical_or(im1, im2)
             iou_score += np.sum(intersection) / np.sum(union)
@@ -64,8 +64,8 @@ def dice_img(y_true, y_pred):
 
 
 def dice_fun(im1, im2):
-    im1 = np.asarray(im1).astype(np.bool)
-    im2 = np.asarray(im2).astype(np.bool)
+    im1 = np.asarray(im1).astype(np.bool_)
+    im2 = np.asarray(im2).astype(np.bool_)
 
     if im1.shape != im2.shape:
         raise ValueError("Shape mismatch: im1 and im2 must have the same shape.")
@@ -100,24 +100,24 @@ def testModel(model_path, test_path, save_path):
     testGener = testGenerator(test_path, target_size=(windowLen, windowLen, 1))
     testGener = enumerate(testGener)
 
-    batch_size = 32
     total = len(glob.glob(os.path.join(test_path, "*.png")))
     flag = True
 
     for batch_start_idx in range(0, total, batch_size):
-        if flag is False:
-            break
         cur_batch_id = batch_start_idx // batch_size + 1
         print('Ready to test in Batch: ', cur_batch_id)
         test_images = []
         for _ in range(batch_size):
-            if flag is False:
-                break
-            i, img = next(testGener)
-            if img is None:
+            try:
+                i, img = next(testGener)
+                test_images.append(img)
+            except Exception as e:
+                print(e)
                 flag = False
                 break
-            test_images.append(img)
+
+        if not test_images:
+            break
 
         test_images_np = np.array(test_images)
         print('Test data shape: ', test_images_np.shape)
@@ -135,6 +135,12 @@ data_gen_args = dict(
     fill_mode="nearest"
 )
 
+num_CV = 1  # 这里是交叉验证的折数
+NumEpochs = 0  # 这里控制训练的epoch数量
+NumEpochEval = 1  # validated the model each NumEpochEval epochs
+batch_size = 100  # batch_size的设置
+learning_rateI = 1e-5
+
 if __name__ == '__main__':
     #############################################Training Parameters#######################################################
     import argparse
@@ -146,12 +152,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 
-    num_CV = 1        # 这里是交叉验证的折数
-    NumEpochs = 500    # 这里控制训练的epoch数量
-    NumEpochEval = 1  # validated the model each NumEpochEval epochs
-    batch_size = 32   # batch_size的设置
-    learning_rateI = 1e-5
-    decayI = learning_rateI / NumEpochs
+
+    if NumEpochs != 0:
+        decayI = learning_rateI / NumEpochs
+    else:
+        decayI = 0
+
     detectionSen = 20 * 20  # labeling each slice as ICH if hemorrhage is detected in detectionSen pixels
     thresholdI = 0.5
     detectionThreshold = thresholdI * 256  # threshold on detection probability
@@ -189,6 +195,7 @@ if __name__ == '__main__':
     with open(str(Path(crossvalid_dir, 'ICH_DataSegmentV1.pkl')), 'rb') as Dataset1:
         [hemorrhageDiagnosisArray, AllCTscans, testMasks, subject_nums_shaffled] = pickle.load(Dataset1)
     del AllCTscans
+
     testMasks = np.uint8(testMasks)
     testMasksAvg = np.where(np.sum(np.sum(testMasks, axis=1), axis=1) > detectionSen, 1, 0)  #
     testPredictions = np.zeros((testMasks.shape[0], imageLen, imageLen), dtype=np.uint8)  # predicted segmentation
@@ -226,6 +233,7 @@ if __name__ == '__main__':
         model_checkpoint = ModelCheckpoint(save_model_path,
                                         mode='min',
                                         verbose=1, save_freq=NumEpochEval)
+
         history1 = modelUnet.fit(trainGener, epochs=NumEpochs,
                                  steps_per_epoch=int(n_imagesTrain / batch_size),
                                  validation_data=valGener, validation_steps=n_imagesValidate,
@@ -243,12 +251,15 @@ if __name__ == '__main__':
                   str(SaveDir_crops_cv))
 
         # Creating full image mask from the crops predictions
-        if cvI < num_CV - 1:
-            subjectNums_cvI_testing = subject_nums_shaffled[
-                                      cvI * int(numSubj / num_CV):cvI * int(numSubj / num_CV) + int(numSubj / num_CV)]
+        if num_CV != 1:
+            if cvI < num_CV - 1:
+                subjectNums_cvI_testing = subject_nums_shaffled[
+                                          cvI * int(numSubj / num_CV):cvI * int(numSubj / num_CV) + int(numSubj / num_CV)]
+            else:
+                subjectNums_cvI_testing = subject_nums_shaffled[cvI * int(numSubj / num_CV):numSubj]
         else:
-            subjectNums_cvI_testing = subject_nums_shaffled[cvI * int(numSubj / num_CV):numSubj]
-
+            subjectNums_cvI_testing = subject_nums_shaffled[: int(numSubj * 0.075)]
+            subjectNums_cvI_trainVal = subject_nums_shaffled[int(numSubj * 0.075):]
         # Finding the predictions or ICH segmentation for the whole slice
         print(
             'Combining the crops masks to find the full CT mask after performing morphological operations and saving the results to: ' + str(
@@ -302,7 +313,6 @@ if __name__ == '__main__':
                 testPredictions[sliceInds[0][counterSlice]] = np.uint8(np.where(img > (0.5 * 256), 1, 0))
                 counterSlice += 1
 
-        K.clear_session()
 
     CVtestPredictionsAvg = np.where(np.sum(np.sum(testPredictions, axis=1), axis=1) > detectionSen, 1, 0)  #
 

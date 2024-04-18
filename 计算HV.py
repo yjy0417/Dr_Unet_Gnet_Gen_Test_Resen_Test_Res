@@ -88,15 +88,24 @@ if __name__ == '__main__':
     ##################--下面的是通过完整的CT标注图计算血肿体积--##################
 
     # 使用示例
-    label_dir = r"C:\Users\1\Downloads\DR_Unet_on_kaggle\DataV1\CV0\test\fullCT\label"
+    label_dir = r"D:\dr-unet-test\DR-UNet\DR-UNet\DataV1\CV0\test\fullCT\label"
     # 使用完整的CT图进行计算血肿体积
-    volumes = calculate_hemorrhage_volume_from_fullCT(label_dir)
+    label_volumes = calculate_hemorrhage_volume_from_fullCT(label_dir)
 
     # 打印每个病人的血肿总体积
 
-    print('完整CT图的血肿体积计算结果\n'
-          '键值对为：\n'
-          'Patient : hemorrhage volume(ml)')
-    print(sorted(volumes.items(), key=lambda x: x[0]))
+    segment_dir = r'D:\远程\results_trial7\fullCT_original\CV0'
+    seg_volumes = calculate_hemorrhage_volume_from_fullCT(segment_dir)
 
+    test_samples = set(label_volumes) & set(seg_volumes)
+
+    print(test_samples)
+
+    for pid in sorted(test_samples):
+        label = label_volumes[pid]
+        pred = seg_volumes[pid]
+        print('病人编号', pid)
+        print('实际血肿体积', label)
+        print('预测血肿体积', pred)
+        print('\n')
 
